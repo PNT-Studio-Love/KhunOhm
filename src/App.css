@@ -439,6 +439,14 @@ audio {
   column-gap: 18px;
 }
 
+.gallery-outro {
+  text-align: center;
+  margin-top: 36px;
+  font-size: 1.1rem;
+  color: var(--primary);
+  font-weight: 800;
+}
+
 .polaroid {
   display: inline-block;
   width: 100%;
@@ -476,7 +484,7 @@ audio {
 
 .video-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 22px;
 }
 
@@ -496,6 +504,31 @@ audio {
   border-radius: 6px;
   background: rgba(93, 36, 55, 0.08);
   object-fit: contain;
+}
+
+.special-video-section {
+  width: min(900px, calc(100% - 32px));
+  margin: 0 auto;
+}
+
+.youtube-container {
+  position: relative;
+  width: 100%;
+  padding-bottom: 56.25%;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 24px 60px rgba(93, 36, 55, 0.16);
+  border: 4px solid var(--paper);
+  background: var(--cream);
+}
+
+.youtube-container iframe {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
 }
 
 .asset-fallback {

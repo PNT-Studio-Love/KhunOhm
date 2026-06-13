@@ -37,6 +37,7 @@ function App() {
       <LoveLetter />
       <Gallery />
       <Videos />
+      <SpecialVideoCard />
       <Footer />
     </main>
   );
@@ -203,6 +204,9 @@ function Gallery() {
           </figure>
         ))}
       </div>
+      {siteConfig.gallery.outro && (
+        <p className="gallery-outro">{siteConfig.gallery.outro}</p>
+      )}
     </section>
   );
 }
@@ -222,7 +226,7 @@ function Videos() {
           return (
             <figure className="video-card" key={item.src}>
               {videoUrl ? (
-                <video autoPlay loop muted playsInline preload="metadata" src={videoUrl}>
+                <video autoPlay loop muted playsInline controls preload="metadata" src={videoUrl}>
                   เบราว์เซอร์นี้ไม่รองรับการเล่นวิดีโอ
                 </video>
               ) : (
@@ -298,6 +302,34 @@ function useTypewriter(text, speed = 20) {
   }, [text, speed]);
 
   return visibleText;
+}
+
+function SpecialVideoCard() {
+  const { specialVideo } = siteConfig;
+
+  if (!specialVideo) return null;
+
+  return (
+    <section id="special-video" className="special-video-section section-pad" aria-labelledby="special-video-title">
+      <SectionHeading
+        eyebrow={specialVideo.sectionTitle}
+        title={specialVideo.title}
+        intro={specialVideo.intro}
+      />
+      <div className="youtube-container">
+        {specialVideo.youtubeId ? (
+          <iframe
+            src={`https://www.youtube.com/embed/${specialVideo.youtubeId}`}
+            title="YouTube video player"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            allowFullScreen
+          ></iframe>
+        ) : (
+          <div className="asset-fallback">ยังไม่ได้ใส่ลิงก์ YouTube</div>
+        )}
+      </div>
+    </section>
+  );
 }
 
 export default App;
