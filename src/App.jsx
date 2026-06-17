@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useRef } from "react";
 import { siteConfig } from "./siteConfig";
 
 const assetModules = import.meta.glob("../assets/**/*", {
@@ -18,6 +18,9 @@ function getAssetUrl(fileName) {
 
 function App() {
   const { theme } = siteConfig;
+  const [hasEntered, setHasEntered] = useState(false);
+  const audioRef = useRef(null);
+
   const themeStyle = {
     "--primary": theme.primary,
     "--secondary": theme.secondary,
@@ -27,21 +30,63 @@ function App() {
     "--accent": theme.accent,
   };
 
+  const handleEnter = () => {
+    setHasEntered(true);
+    if (audioRef.current) {
+      audioRef.current.play().catch(e => console.log("Audio play failed:", e));
+    }
+  };
+
   return (
-    <main className="site-shell" style={themeStyle}>
+    <main className="site-shell" style={{ ...themeStyle, ...(hasEntered ? {} : { height: '100vh', overflow: 'hidden' }) }}>
+      {!hasEntered && (
+        <div className="gift-overlay">
+          {/* Floating hearts background */}
+          <div className="gift-hearts" aria-hidden="true">
+            <span>♡</span><span>♡</span><span>♡</span>
+            <span>♡</span><span>♡</span><span>♡</span>
+            <span>♡</span><span>♡</span>
+          </div>
+
+          <div className="gift-card">
+            {/* Ribbon decoration */}
+            <div className="gift-ribbon" aria-hidden="true">
+              <div className="gift-ribbon-v" />
+              <div className="gift-ribbon-h" />
+              <div className="gift-bow">
+                <span className="bow-loop bow-left" />
+                <span className="bow-loop bow-right" />
+                <span className="bow-knot" />
+              </div>
+            </div>
+
+            {/* Content */}
+            <p className="gift-from">จากพี่โอม ถึง คุณกอล์ฟ</p>
+            <h2 className="gift-title">พี่มีของขวัญเล็ก ๆ<br />มาฝากครับ</h2>
+            <p className="gift-subtitle">
+              เรื่องราวน่ารัก ๆ ตลอด 3 เดือนที่ผ่านมา<br />ถูกเก็บไว้ข้างในนี้แล้ว
+            </p>
+
+            <button className="gift-btn" onClick={handleEnter} type="button">
+              <span className="gift-btn-icon">💌</span>
+              <span>แตะเพื่อเปิดของขวัญ</span>
+            </button>
+          </div>
+        </div>
+      )}
       <FloatingDecor />
       <Navigation />
       <Hero />
-      <MusicCard />
-      <Timeline />
-      <LoveLetter />
-      <Gallery />
-      <MiniGame />
-      <PromiseSection />
-      <Videos />
-      <SpecialVideoCard />
-      <Footer />
-    </main>
+        <MusicCard audioRef={audioRef} />
+        <Timeline />
+        <LoveLetter />
+        <Gallery />
+        <MiniGame />
+        <PromiseSection />
+        <Videos />
+        <SpecialVideoCard />
+        <Footer />
+      </main>
   );
 }
 
@@ -111,7 +156,7 @@ function Hero() {
   );
 }
 
-function MusicCard() {
+function MusicCard({ audioRef }) {
   const audioUrl = getAssetUrl(siteConfig.music.audioFile);
 
   return (
@@ -123,7 +168,7 @@ function MusicCard() {
           <p>{siteConfig.music.artistText}</p>
         </div>
         {audioUrl ? (
-          <audio controls autoPlay src={audioUrl}>
+          <audio ref={audioRef} controls autoPlay src={audioUrl}>
             เบราว์เซอร์นี้ไม่รองรับการเล่นเสียง
           </audio>
         ) : (
