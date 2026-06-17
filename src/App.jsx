@@ -36,6 +36,8 @@ function App() {
       <Timeline />
       <LoveLetter />
       <Gallery />
+      <MiniGame />
+      <PromiseSection />
       <Videos />
       <SpecialVideoCard />
       <Footer />
@@ -155,11 +157,33 @@ function Timeline() {
               <h3>{item.title}</h3>
               <p>{item.text}</p>
             </div>
-            <MediaPreview fileName={item.image} alt={item.title} className="timeline-media" />
+            <TimelineMedia item={item} />
           </article>
         ))}
       </div>
     </section>
+  );
+}
+
+function TimelineMedia({ item }) {
+  const files = item.images?.length ? item.images : [item.image].filter(Boolean);
+
+  if (files.length === 1) {
+    return <MediaPreview fileName={files[0]} alt={item.title} className="timeline-media" />;
+  }
+
+  return (
+    <div className={`timeline-polaroids count-${files.length}`}>
+      {files.map((fileName, index) => (
+        <div className="timeline-polaroid" key={fileName}>
+          <MediaPreview
+            fileName={fileName}
+            alt={`${item.title} ${index + 1}`}
+            className="polaroid-img"
+          />
+        </div>
+      ))}
+    </div>
   );
 }
 
@@ -188,6 +212,123 @@ function LoveLetter() {
   );
 }
 
+function MiniGame() {
+  const [cards, setCards] = useState(() => buildGameDeck());
+  const [selected, setSelected] = useState([]);
+  const [matched, setMatched] = useState([]);
+
+  const complete = matched.length === siteConfig.miniGame.cards.length;
+
+  function resetGame() {
+    setCards(buildGameDeck());
+    setSelected([]);
+    setMatched([]);
+  }
+
+  function chooseCard(card) {
+    if (selected.length === 2 || selected.includes(card.uid) || matched.includes(card.id)) return;
+
+    const next = [...selected, card.uid];
+    setSelected(next);
+
+    if (next.length !== 2) return;
+
+    const [first, second] = next.map((uid) => cards.find((item) => item.uid === uid));
+
+    if (first.id === second.id) {
+      setMatched((items) => [...items, first.id]);
+      setSelected([]);
+      return;
+    }
+
+    window.setTimeout(() => setSelected([]), 700);
+  }
+
+  return (
+    <section id="mini-game" className="section-pad mini-game-section">
+      <SectionHeading
+        eyebrow={siteConfig.miniGame.sectionTitle}
+        title={siteConfig.miniGame.title}
+        intro={siteConfig.miniGame.intro}
+      />
+      <div className="game-panel">
+        <div className="game-grid">
+          {cards.map((card) => {
+            const isOpen = selected.includes(card.uid) || matched.includes(card.id);
+
+            return (
+              <button
+                className={`memory-card ${isOpen ? "is-open" : ""}`}
+                key={card.uid}
+                onClick={() => chooseCard(card)}
+                type="button"
+              >
+                <span className="memory-front">รัก</span>
+                <span className="memory-back">
+                  <MediaPreview fileName={card.image} alt={card.label} />
+                  <span>{card.label}</span>
+                </span>
+              </button>
+            );
+          })}
+        </div>
+        <div className="game-actions">
+          <p>{complete ? siteConfig.miniGame.completeText : "จับคู่รูปที่เหมือนกันให้ครบทุกคู่นะครับ"}</p>
+          <button className="btn ghost" onClick={resetGame} type="button">
+            {siteConfig.miniGame.resetText}
+          </button>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+function PromiseSection() {
+  return (
+    <section id="promise" className="section-pad promise-section">
+      <SectionHeading
+        eyebrow={siteConfig.promise.sectionTitle}
+        title={siteConfig.promise.title}
+        intro={siteConfig.promise.intro}
+      />
+      <div className="scroll-hint" aria-hidden="true">
+        <span className="scroll-hint-icon">↔</span>
+        <span>เลื่อนซ้าย-ขวาเพื่อดูคำสัญญาอื่น ๆ</span>
+      </div>
+      <div className="promise-grid">
+        {siteConfig.promise.items.map((item, index) => (
+          <PromiseCard key={item.title} item={item} index={index} />
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function PromiseCard({ item, index }) {
+  const [isFlipped, setIsFlipped] = useState(false);
+
+  return (
+    <button 
+      className={`promise-card-flip ${isFlipped ? "is-flipped" : ""}`}
+      onClick={() => setIsFlipped(!isFlipped)}
+      type="button"
+      aria-expanded={isFlipped}
+    >
+      <div className="promise-card-inner">
+        <div className="promise-front">
+          <span>{String(index + 1).padStart(2, "0")}</span>
+          <h3>{item.title}</h3>
+          {item.emoji && <div className="promise-emoji">{item.emoji}</div>}
+          <p className="tap-hint">แตะเพื่อดูคำสัญญา</p>
+        </div>
+        <div className="promise-back">
+          <p>{item.text}</p>
+        </div>
+      </div>
+    </button>
+  );
+}
+
 function Gallery() {
   return (
     <section id="gallery" className="section-pad gallery-section">
@@ -209,6 +350,19 @@ function Gallery() {
       )}
     </section>
   );
+}
+
+function buildGameDeck() {
+  return shuffle(
+    siteConfig.miniGame.cards.flatMap((card) => [
+      { ...card, uid: `${card.id}-a` },
+      { ...card, uid: `${card.id}-b` },
+    ])
+  );
+}
+
+function shuffle(items) {
+  return [...items].sort(() => Math.random() - 0.5);
 }
 
 function Videos() {
